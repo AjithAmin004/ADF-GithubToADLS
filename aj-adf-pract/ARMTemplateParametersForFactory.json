@@ -1,0 +1,21 @@
+{
+	"$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"value": "aj-adf-pract"
+		},
+		"AzureDataLakeStorage_accountKey": {
+			"value": ""
+		},
+		"AzureDataLakeStorage_properties_typeProperties_url": {
+			"value": "https://ajitstorage.dfs.core.windows.net/"
+		},
+		"HttpServer1_properties_typeProperties_url": {
+			"value": "https://raw.githubusercontent.com/"
+		},
+		"RestService1_properties_typeProperties_url": {
+			"value": "http://empty.com"
+		}
+	}
+}
