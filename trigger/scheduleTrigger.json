@@ -2,13 +2,20 @@
 	"name": "scheduleTrigger",
 	"properties": {
 		"annotations": [],
-		"runtimeState": "Stopped",
-		"pipelines": [],
+		"runtimeState": "Started",
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "adlstoadlsFilter",
+					"type": "PipelineReference"
+				}
+			}
+		],
 		"type": "ScheduleTrigger",
 		"typeProperties": {
 			"recurrence": {
 				"frequency": "Minute",
-				"interval": 10,
+				"interval": 5,
 				"startTime": "2026-02-28T15:12:00",
 				"timeZone": "India Standard Time"
 			}
