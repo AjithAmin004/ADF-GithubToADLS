@@ -1,0 +1,197 @@
+{
+	"name": "GitToAdls",
+	"properties": {
+		"activities": [
+			{
+				"name": "getDataFromFromGit",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "listsOfURLs",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@variables('test')",
+						"type": "Expression"
+					},
+					"isSequential": true,
+					"activities": [
+						{
+							"name": "WebCall",
+							"type": "WebActivity",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"method": "GET",
+								"url": {
+									"value": "@concat('https://raw.githubusercontent.com/', item())",
+									"type": "Expression"
+								}
+							}
+						},
+						{
+							"name": "storeData",
+							"type": "SetVariable",
+							"dependsOn": [
+								{
+									"activity": "WebCall",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "FileData",
+								"value": {
+									"value": "@activity('WebCall').output.Response",
+									"type": "Expression"
+								}
+							}
+						},
+						{
+							"name": "CopydataToAdls",
+							"type": "Copy",
+							"dependsOn": [
+								{
+									"activity": "storeData",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "DelimitedTextSource",
+									"additionalColumns": [
+										{
+											"name": "newCol",
+											"value": {
+												"value": "@variables('FileData')",
+												"type": "Expression"
+											}
+										}
+									],
+									"storeSettings": {
+										"type": "AzureBlobFSReadSettings",
+										"recursive": true,
+										"enablePartitionDiscovery": false
+									},
+									"formatSettings": {
+										"type": "DelimitedTextReadSettings"
+									}
+								},
+								"sink": {
+									"type": "DelimitedTextSink",
+									"storeSettings": {
+										"type": "AzureBlobFSWriteSettings"
+									},
+									"formatSettings": {
+										"type": "DelimitedTextWriteSettings",
+										"quoteAllText": true,
+										"fileExtension": ".txt"
+									}
+								},
+								"enableStaging": false,
+								"translator": {
+									"type": "TabularTranslator",
+									"mappings": [
+										{
+											"source": {
+												"name": "newCol",
+												"type": "String"
+											},
+											"sink": {
+												"type": "String",
+												"physicalType": "String",
+												"ordinal": 1
+											}
+										}
+									],
+									"typeConversion": true,
+									"typeConversionSettings": {
+										"allowDataTruncation": true,
+										"treatBooleanAsNumber": false
+									}
+								}
+							},
+							"inputs": [
+								{
+									"referenceName": "DelimitedText2",
+									"type": "DatasetReference"
+								}
+							],
+							"outputs": [
+								{
+									"referenceName": "DelimitedText1",
+									"type": "DatasetReference",
+									"parameters": {
+										"fileName": {
+											"value": "@last(split(item(),'/'))",
+											"type": "Expression"
+										}
+									}
+								}
+							]
+						}
+					]
+				}
+			},
+			{
+				"name": "listsOfURLs",
+				"type": "SetVariable",
+				"dependsOn": [],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "test",
+					"value": {
+						"value": "@createArray(\n  'anshlambagit/Azure-Data-Factory/refs/heads/main/Raw Data/2010-12-08.csv',\n  'anshlambagit/Azure-Data-Factory/refs/heads/main/Raw Data/Fact_Sales_1.csv',\n  'anshlambagit/Azure-Data-Factory/refs/heads/main/Raw Data/Fact_Sales_2.csv')",
+						"type": "Expression"
+					}
+				}
+			}
+		],
+		"variables": {
+			"CSVData": {
+				"type": "String"
+			},
+			"FileData": {
+				"type": "String"
+			},
+			"test": {
+				"type": "Array"
+			}
+		},
+		"annotations": [],
+		"lastPublishTime": "2026-02-28T10:47:30Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}
